@@ -9,8 +9,10 @@ public class PlayerInteractions : MonoBehaviour
     [SerializeField] private ParticleSystem _deadParticle;
     [SerializeField] private LayerMask _checkpointPlatformLayer;
     [SerializeField] private SaveRoot _saveSystem;
+    [SerializeField] private GameObject _winPanel;
 
     public event Action TouchWall;
+    public event Action StayNearWall;
     public event Action DeadZoneTouched;
     public event Action FallFromWall;
     public event Action TouchPlatform;
@@ -62,6 +64,12 @@ public class PlayerInteractions : MonoBehaviour
         {
             item.Taked();
         }
+
+        if(collision.gameObject.TryGetComponent<WinZone>(out WinZone winZone))
+        {
+            winZone.Win();
+            Win();
+        }
     }
 
     private void Dead()
@@ -69,6 +77,11 @@ public class PlayerInteractions : MonoBehaviour
         _root.position = _saveSystem.GetCheckPoint();
         _playerAnimations.RestartAnimations();
         StopCoroutine(DeadDelay());
+    }
+
+    private void Win()
+    {
+        _winPanel.SetActive(true);
     }
 
     private IEnumerator DeadDelay()

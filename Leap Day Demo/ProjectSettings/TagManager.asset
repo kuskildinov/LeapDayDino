@@ -8,6 +8,7 @@ TagManager:
   - Platform
   - CheckPoint
   - DeadZone
+  - WinZone
   layers:
   - Default
   - TransparentFX

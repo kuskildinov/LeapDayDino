@@ -18,7 +18,8 @@ public class PlayerMovment : MonoBehaviour
     public event Action PlayerJumped;
     public event Action PlayerStandPlatform;
 
-    private bool _grounded = true; 
+    private bool _grounded = true;
+    private bool _canMove = true;
     private int _extraJumpsValue; 
     private IInput _input;
     private float _moveDirection = 0.9f;
@@ -26,20 +27,21 @@ public class PlayerMovment : MonoBehaviour
 
     private void Update()
     {
-        if (_grounded)
-            Move();
-        if (_input.PlayerTap())
+        if(_canMove)
         {
-            _grounded = false;
-            _rigidbody.gravityScale = 1;
-            PlayerJumped?.Invoke();
-            if (_extraJumpsValue > 0)
+            if (_grounded)
+                Move();
+            if (_input.PlayerTap())
             {
-                Jump();               
+                _grounded = false;
+                _rigidbody.gravityScale = 1;
+                PlayerJumped?.Invoke();
+                if (_extraJumpsValue > 0)
+                {
+                    Jump();
+                }
             }
-
-            
-        }
+        }        
     }
 
     public void Initialize(IInput input)
@@ -49,6 +51,7 @@ public class PlayerMovment : MonoBehaviour
         _playerInteractions.TouchPlatform += LandToPlatform;
         _playerInteractions.FallFromPlatform += FallFromPlatform;
         _playerInteractions.FallFromWall += FallFromWall;
+        _playerInteractions.DeadZoneTouched += Die;
         _extraJumpsValue = _maxJumpValue;
         Time.timeScale = 1.5f;
     }
@@ -68,6 +71,7 @@ public class PlayerMovment : MonoBehaviour
         _grounded = true;
         _extraJumpsValue = _maxJumpValue;
         _rigidbody.gravityScale = 1;
+        _canMove = true;
     }
 
     private void FallFromPlatform()
@@ -78,7 +82,7 @@ public class PlayerMovment : MonoBehaviour
 
     private void FallFromWall()
     {       
-        _rigidbody.gravityScale = 1;
+        _rigidbody.gravityScale = 1;        
     }
 
     private void OnDisable()
@@ -87,6 +91,12 @@ public class PlayerMovment : MonoBehaviour
         _playerInteractions.TouchPlatform -= LandToPlatform;
         _playerInteractions.FallFromPlatform -= FallFromPlatform;
         _playerInteractions.FallFromWall -= FallFromWall;
+        _playerInteractions.DeadZoneTouched -= Die;
+    }
+
+    private void Die()
+    {
+        _canMove = false;
     }
 
     #region Walk
