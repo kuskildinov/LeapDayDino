@@ -4,41 +4,40 @@ using UnityEngine;
 
 public class PlayerAnimations : MonoBehaviour
 {
-    [SerializeField] private Animator _animator;
-    [SerializeField] private PlayerMovment _playerMovment;
     [SerializeField] private PlayerInteractions _playerInteractions;
-
-   public void Initialize()
+    [SerializeField] private Animator _animator;
+    public void OnWall()
     {
-        _playerMovment.PlayerJumped += JumpAnimation;
-        _playerMovment.PlayerStandPlatform += RunAnimation;
-        _playerInteractions.DeadZoneTouched += DeathAnimation;
+        _animator.SetBool("OnWall",true);
     }
 
-    private void OnDisable()
+    public void ExitWall()
     {
-        _playerMovment.PlayerJumped -= JumpAnimation;
-        _playerMovment.PlayerStandPlatform -= RunAnimation;
-        _playerInteractions.DeadZoneTouched -= DeathAnimation;
-    }
-    private void JumpAnimation()
-    {
-        _animator.SetBool("Jump",true);
+        _animator.SetBool("OnWall", false);
     }
 
-    private void RunAnimation()
-    {
-        _animator.SetBool("Jump", false);
-    }
-
-    private void DeathAnimation()
+    public void Die()
     {
         _animator.SetBool("Die", true);
     }
 
-    public void RestartAnimations()
+    public void NewLive()
     {
         _animator.SetBool("Die", false);
+    }
+
+    public void Jump()
+    {
+        _animator.SetBool("Jump", true);
+    }
+
+    public void Fall()
+    {
+        _animator.SetBool("Fall", true);
+    }
+    public void Land()
+    {
         _animator.SetBool("Jump", false);
+        _animator.SetBool("Fall", false);
     }
 }

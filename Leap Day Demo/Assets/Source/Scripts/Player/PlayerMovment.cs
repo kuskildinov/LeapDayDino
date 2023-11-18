@@ -1,134 +1,69 @@
-using System;
 using UnityEngine;
 
 public class PlayerMovment : MonoBehaviour
 {
     [Header("Move")]
-    [SerializeField,Min(0)] private float _speed;
+    [SerializeField, Min(0)] private float _speed;
+
     [Header("Jump")]
-    [SerializeField,Min(0)] private float _jumpForce;
-    [SerializeField] private int _maxJumpValue = 2;
+    [SerializeField, Min(0)] private float _jumpForce;
+
     [Header("Slide")]
     [SerializeField] private float _slipeDownSpeed;
+
     [Header("Settings")]
     [SerializeField] private Transform _root;
     [SerializeField] private Rigidbody2D _rigidbody;
-    [SerializeField] private PlayerInteractions _playerInteractions; 
+    [SerializeField] private SpriteRenderer _sprite;
 
-    public event Action PlayerJumped;
-    public event Action PlayerStandPlatform;
-
-    private bool _grounded = true;
-    private bool _canMove = true;
-    private int _extraJumpsValue; 
-    private IInput _input;
     private float _moveDirection = 0.9f;
 
 
-    private void Update()
-    {
-        if(_canMove)
-        {
-            if (_grounded)
-                Move();
-            if (_input.PlayerTap())
-            {
-                _grounded = false;
-                _rigidbody.gravityScale = 1;
-                PlayerJumped?.Invoke();
-                if (_extraJumpsValue > 0)
-                {
-                    Jump();
-                }
-            }
-        }        
-    }
-
-    public void Initialize(IInput input)
-    {
-        _input = input;       
-        _playerInteractions.TouchWall += TouchWall;
-        _playerInteractions.TouchPlatform += LandToPlatform;
-        _playerInteractions.FallFromPlatform += FallFromPlatform;
-        _playerInteractions.FallFromWall += FallFromWall;
-        _playerInteractions.DeadZoneTouched += Die;
-        _extraJumpsValue = _maxJumpValue;
-        Time.timeScale = 1.5f;
-    }
-
-    private void TouchWall()
-    {
-        ChangeMoveDirection();
-        PlayerStandPlatform?.Invoke();
-        if (_grounded == false)
-            SlipDownToWall();
-        _extraJumpsValue = _maxJumpValue;               
-    }
-
-    private void LandToPlatform()
-    {
-        PlayerStandPlatform?.Invoke();
-        _grounded = true;
-        _extraJumpsValue = _maxJumpValue;
-        _rigidbody.gravityScale = 1;
-        _canMove = true;
-    }
-
-    private void FallFromPlatform()
-    {
-        _grounded = false;
-        _rigidbody.gravityScale = 1;
-    }
-
-    private void FallFromWall()
-    {       
-        _rigidbody.gravityScale = 1;        
-    }
-
-    private void OnDisable()
-    {
-        _playerInteractions.TouchWall -= TouchWall;
-        _playerInteractions.TouchPlatform -= LandToPlatform;
-        _playerInteractions.FallFromPlatform -= FallFromPlatform;
-        _playerInteractions.FallFromWall -= FallFromWall;
-        _playerInteractions.DeadZoneTouched -= Die;
-    }
-
-    private void Die()
-    {
-        _canMove = false;
-    }
-
     #region Walk
-    private void Move()
+    public void Move()
     {
-        Vector2 newVelocity = new Vector2(_moveDirection * _speed,_rigidbody.velocity.y);
+        Vector2 newVelocity = new Vector2(_moveDirection * _speed, _rigidbody.velocity.y);
         _rigidbody.velocity = newVelocity;
     }
 
-    private void ChangeMoveDirection()
+    public void ChangeMoveDirection()
     {
-        _moveDirection *= -1;        
+        _moveDirection *= -1;
+        if (_sprite.flipX == true)
+        {
+            _sprite.flipX = false;
+        }
+        else
+            _sprite.flipX = true;
     }
-
     #endregion
 
     #region Jump
-    private void Jump()
-    {        
-        _rigidbody.velocity = new Vector2(_moveDirection,2) * _jumpForce;
-        _extraJumpsValue--;
+    public void Jump()
+    {
+        _rigidbody.velocity = new Vector2(_moveDirection, 2) * _jumpForce;
+    }
+
+    public void SecondJump()
+    {
+        Jump();
     }
     #endregion
 
-    #region SlideToWall
-
-    private void SlipDownToWall()
+    #region Slide
+    public void SlipDownToWall()
     {
         Vector2 slideDownVelocity = new Vector2(_rigidbody.velocity.x, Vector2.down.y);
         _rigidbody.velocity = slideDownVelocity * _slipeDownSpeed;
+    }
+    public void ActivateGravity()
+    {
+        _rigidbody.gravityScale = 1;
+    }
+    public void DeactivateGravity()
+    {
         _rigidbody.gravityScale = 0;
-    }  
+    }
 
     #endregion
 }
